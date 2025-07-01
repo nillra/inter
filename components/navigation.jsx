@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X, User, LogIn } from "lucide-react"
@@ -8,6 +8,14 @@ import { Menu, X, User, LogIn } from "lucide-react"
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(true) // Set to false by default, true for demo
+  const [username, setUsername] = useState("")
+  const [profilePic, setProfilePic] = useState("")
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username")
+    // const storedProfilePic = localStorage.getItem("profilePic")
+    if (storedUsername) setUsername(storedUsername)
+    // if (storedProfilePic) setProfilePic(storedProfilePic)
+  }, [])
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm border-b border-white/20 dark:border-gray-700/20 sticky top-0 z-50 transition-all duration-300">
@@ -65,10 +73,20 @@ export default function Navigation() {
                     variant="ghost"
                     className="flex items-center space-x-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transform hover:scale-105 transition-all duration-300"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium animate-gradient-x bg-300%">
-                      JD
-                    </div>
-                    <span>Profile</span>
+                    <Link href="/profile">
+  <Button
+    variant="ghost"
+    className="flex items-center space-x-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transform hover:scale-105 transition-all duration-300"
+  >
+    <img
+      src={profilePic || "/avatar.jpeg"}
+      alt="User Profile"
+      className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
+    />
+    <span>{username || "User"}</span>
+  </Button>
+</Link>
+
                   </Button>
                 </Link>
                 <Link href="/create-post">

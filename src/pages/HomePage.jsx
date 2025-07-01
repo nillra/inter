@@ -11,13 +11,14 @@ import CompanyDashboard from "../components/CompanyDashboard"
 import ThemeToggle from "../components/ThemeToggle"
 
 const featuredCompanies = [
-  { name: "Google", posts: 245, logo: "/placeholder.svg?height=40&width=40" },
-  { name: "Microsoft", posts: 189, logo: "/placeholder.svg?height=40&width=40" },
-  { name: "Amazon", posts: 167, logo: "/placeholder.svg?height=40&width=40" },
-  { name: "Meta", posts: 134, logo: "/placeholder.svg?height=40&width=40" },
-  { name: "Apple", posts: 98, logo: "/placeholder.svg?height=40&width=40" },
-  { name: "Netflix", posts: 76, logo: "/placeholder.svg?height=40&width=40" },
+  { name: "Google", posts: 245, logo: "/Google.jpg" },
+  { name: "Microsoft", posts: 189, logo: "/Microsoft.jpg" },
+  { name: "Amazon", posts: 167, logo: "/Amazon.jpg" },
+  { name: "Meta", posts: 134, logo: "/Meta.jpg" },
+  { name: "Apple", posts: 98, logo: "/Apple.jpg" },
+  { name: "Netflix", posts: 76, logo: "/Netflix.jpg" }, // ✅ corrected from Netfilx.jpg
 ]
+
 
 const recentPosts = [
   {
@@ -81,7 +82,8 @@ export default function HomePage() {
   if (selectedCompany) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 transition-colors duration-500">
-        <Navigation />
+        <Navigation  />
+
         {isLoggedIn && <ThemeToggle />}
         <CompanyDashboard companyName={selectedCompany} onBack={() => setSelectedCompany(null)} />
       </div>
@@ -160,7 +162,7 @@ export default function HomePage() {
                 <CardHeader className="flex flex-row items-center space-y-0 pb-2 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-purple-500/5 via-blue-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
                   <img
-                    src={company.logo || "/placeholder.svg"}
+                    src={company.logo || "/avatar.jpeg"}
                     alt={`${company.name} logo`}
                     className="w-12 h-12 rounded-full mr-3 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12 shadow-lg"
                   />

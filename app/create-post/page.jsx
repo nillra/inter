@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import Navigation from "@/components/navigation"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
+
 
 const companies = ["Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Tesla", "Uber", "Airbnb", "Spotify"]
 
@@ -88,20 +90,70 @@ export default function CreatePostPage() {
       tags: formData.tags.filter((tag) => tag !== tagToRemove),
     })
   }
+  const router = useRouter();
+
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = storedUser?.id;
 
-    console.log("Post data:", formData)
-    setIsSubmitting(false)
+    if (!userId) {
+      alert("User ID not found. Please log in again.");
+      return;
+    }
 
-    // Redirect to profile or posts page
-    // In real app: router.push('/profile')
+    const postPayload = {
+      companyname: formData.company,
+      position: formData.position,
+      location: formData.location,
+      interviewDate: formData.interviewDate,
+      interviewType: formData.interviewType,
+      difficulty: formData.difficulty,
+      outcome: formData.outcome,
+      experience: formData.content, // 'content' is same as 'experience'
+      tips: formData.tips,
+      tags: formData.tags,
+    };
+
+    const res = await fetch(`http://localhost:8080/api/posts?userId=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postPayload),
+    });
+
+    if (!res.ok) throw new Error("Failed to publish post");
+
+    alert("Post published successfully!");
+    setFormData({
+      company: "",
+      position: "",
+      location: "",
+      interviewDate: "",
+      interviewType: "",
+      experience: "",
+      difficulty: "",
+      outcome: "",
+      content: "",
+      tips: "",
+      tags: [],
+    });
+
+    // optional: navigate to user profile or post listing
+    router.push("/profile");
+  } catch (err) {
+    console.error("Submit error:", err);
+    alert("Something went wrong while publishing.");
+  } finally {
+    setIsSubmitting(false);
   }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 via-yellow-50 via-emerald-50 via-cyan-50 via-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-purple-900/50 dark:via-blue-900/50 dark:via-indigo-900/50 dark:to-violet-900/50 animate-gradient-xy animate-in fade-in duration-700">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { ArrowLeft, Building2, Brain, Code2, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,10 +14,10 @@ const companyData = {
       name: "Google LLC",
       founded: "1998",
       headquarters: "Mountain View, California",
-      employees: "150,000+",
-      industry: "Technology",
-      description:
-        "Google is a multinational technology company that specializes in Internet-related services and products, including online advertising technologies, a search engine, cloud computing, software, and hardware.",
+      // employees: "150,000+",
+      // industry: "Technology",
+      // description:
+        // "Google is a multinational technology company that specializes in Internet-related services and products, including online advertising technologies, a search engine, cloud computing, software, and hardware.",
     },
     aptitude: {
       crtQuant: [
@@ -77,6 +77,43 @@ const samplePosts = [
 export default function CompanyDashboard({ companyName, onBack }) {
   const [activeAptitudeTab, setActiveAptitudeTab] = useState("quant")
   const company = companyData[companyName] || companyData["Google"]
+  const [interviewPosts, setInterviewPosts] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [aboutData, setAboutData] = useState(null)
+
+  const companyname=companyName;
+
+  useEffect(() => {
+    if (companyName) {
+      setLoading(true)
+      fetch(`http://localhost:8080/api/posts/byCompany?companyname=${companyname}`)
+        .then(res => res.json())
+        .then(data => {
+          console.log("Fetched interview posts:", data)
+          setInterviewPosts(data)
+           setLoading(false)
+        })
+        // Fetch company about info
+    fetch(`http://localhost:8080/api/company-basic/company-basic-info/${companyname}`)
+
+      .then((res) => {
+        if (!res.ok) throw new Error("No company details found")
+        return res.json()
+      })
+      .then((data) => {
+        console.log("Company details",data)
+        setAboutData(data)
+      })
+      .catch((err) => {
+        console.error("Error fetching company about:", err)
+        setAboutData(null)
+      })
+        .catch(err => {
+          console.error("Error fetching interviews:", err)
+           setLoading(false)
+        })
+    }
+  }, [companyName])
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -156,24 +193,49 @@ export default function CompanyDashboard({ companyName, onBack }) {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  {Object.entries(company.about)
-                    .slice(0, 3)
-                    .map(([key, value], index) => (
-                      <div
-                        key={key}
-                        className="animate-in slide-in-from-left-4 duration-500"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 capitalize">
-                          {key.replace(/([A-Z])/g, " $1")}
-                        </h3>
-                        <p className="text-gray-700 dark:text-gray-300 p-3 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/20 dark:to-transparent rounded-lg border-l-4 border-blue-500 dark:border-blue-400">
-                          {value}
-                        </p>
-                      </div>
-                    ))}
+                  {aboutData
+  ? (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        {Object.entries(aboutData).slice(0, 3).map(([key, value], index) => (
+          <div
+            key={key}
+            className="animate-in slide-in-from-left-4 duration-500"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 capitalize">
+              {key.replace(/([A-Z])/g, " $1")}
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300 p-3 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/20 dark:to-transparent rounded-lg border-l-4 border-blue-500 dark:border-blue-400">
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-4">
+        {Object.entries(aboutData).slice(3).map(([key, value], index) => (
+          <div
+            key={key}
+            className="animate-in slide-in-from-right-4 duration-500"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 capitalize">
+              {key.replace(/([A-Z])/g, " $1")}
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300 p-3 bg-gradient-to-l from-purple-50/50 to-transparent dark:from-purple-900/20 dark:to-transparent rounded-lg border-r-4 border-purple-500 dark:border-purple-400">
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <p className="text-gray-500 dark:text-gray-400">No information available for {companyName}.</p>
+  )
+}
+
                 </div>
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                   {Object.entries(company.about)
                     .slice(3, 6)
                     .map(([key, value], index) => (
@@ -190,7 +252,7 @@ export default function CompanyDashboard({ companyName, onBack }) {
                         </p>
                       </div>
                     ))}
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -334,15 +396,19 @@ export default function CompanyDashboard({ companyName, onBack }) {
           Recent Interview Posts for {companyName}
         </h2>
         <div className="space-y-6">
-          {samplePosts.map((post, index) => (
-            <div
-              key={post.id}
-              className="animate-in slide-in-from-left-4 duration-700"
-              style={{ animationDelay: `${index * 200}ms` }}
-            >
-              <InterviewPost post={post} />
-            </div>
-          ))}
+          {interviewPosts.length > 0 ? (
+  interviewPosts.map((post, index) => (
+    <div
+      key={post.id}
+      className="animate-in slide-in-from-left-4 duration-700"
+      style={{ animationDelay: `${index * 200}ms` }}
+    >
+      <InterviewPost post={post} />
+    </div>
+  ))
+) : (
+  <p className="text-gray-500 dark:text-gray-400 text-center">No interview posts found for {companyName}.</p>
+)}
         </div>
       </div>
     </div>

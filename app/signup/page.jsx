@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
+import { registerUser } from "../../src/api/auth"
+import { useRouter } from "next/navigation"
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -29,23 +31,42 @@ export default function SignUpPage() {
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle signup logic here
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!")
-      return
-    }
-    if (!formData.agreeToTerms) {
-      alert("Please agree to the terms and conditions")
-      return
-    }
-    console.log("Signup attempt:", formData)
+  const router = useRouter()
 
-    // Simulate successful signup and redirect
-    alert("Account created successfully! Redirecting to home page...")
-    window.location.href = "/"
+const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match!")
+    return
   }
+
+  if (!formData.agreeToTerms) {
+    alert("Please agree to the terms and conditions")
+    return
+  }
+
+  const payload = {
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
+  }
+
+  try {
+    const result = await registerUser(payload)
+
+    if (result.success) {
+      alert("Account created successfully!")
+      router.push("/login")
+    } else {
+      alert(result.message || "Registration failed")
+    }
+  } catch (err) {
+    console.error("Signup error:", err)
+    alert("Something went wrong. Please try again.")
+  }
+}
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 via-yellow-50 via-emerald-50 via-cyan-50 via-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-purple-900/50 dark:via-blue-900/50 dark:via-indigo-900/50 dark:to-violet-900/50 animate-gradient-xy flex items-center justify-center p-4 relative overflow-hidden animate-in fade-in duration-1000">
@@ -82,17 +103,17 @@ export default function SignUpPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Enhanced form fields with staggered animations */}
               <div className="space-y-2 animate-in slide-in-from-left-4 duration-500 delay-400">
-                <Label htmlFor="fullName" className="text-gray-700 dark:text-gray-300 font-medium">
+                <Label htmlFor="username" className="text-gray-700 dark:text-gray-300 font-medium">
                   Full Name
                 </Label>
                 <div className="relative group">
                   <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4 transition-colors group-focus-within:text-purple-500 dark:group-focus-within:text-purple-400" />
                   <Input
-                    id="fullName"
-                    name="fullName"
+                    id="username"
+                    name="username"
                     type="text"
-                    placeholder="Enter your full name"
-                    value={formData.fullName}
+                    placeholder="Enter username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     className="pl-10 border-2 border-gray-200 dark:border-gray-600 focus:border-purple-400 dark:focus:border-purple-500 focus:ring-4 focus:ring-purple-100 dark:focus:ring-purple-900/30 transition-all duration-300 hover:shadow-md transform hover:-translate-y-0.5 bg-white dark:bg-gray-700"
                     required
